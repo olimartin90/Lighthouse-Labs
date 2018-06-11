@@ -13,5 +13,3 @@ result = inputs.map(function(input) {
 console.log(result[0] === 5);
 console.log(result[1] === 13);
 console.log(result[2] === 17);
-
-
