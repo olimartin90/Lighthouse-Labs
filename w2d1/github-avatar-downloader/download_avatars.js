@@ -2,6 +2,10 @@ var request = require('request');
 var token = require('./secrets');
 var fs = require('fs');
 
+var repoOwner = process.argv[2];
+var repoName = process.argv[3];
+
+
 function getRepoContributors(repoOwner, repoName, cb) {
   var options = {
     url: "https://api.github.com/repos/" + repoOwner + "/" + repoName + "/contributors",
@@ -37,9 +41,13 @@ request.get(url)
 
 }
 
-getRepoContributors("jquery", "jquery", function(err, jsonString) {
+getRepoContributors(repoOwner, repoName, function(err, jsonString) {
+  if (!repoOwner || !repoName) {
+    console.log("Error!")
+  } else {
   var jsObject = JSON.parse(jsonString);
   for (var user of jsObject) {
     downloadImageByURL(user.avatar_url, "./avatars/" + user.login + ".jpg")
+  }
   }
 });
