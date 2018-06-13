@@ -71,6 +71,13 @@ app.get("/urls/:id", (req, res) => {
     res.render("urls_show", templateVars);
 });
 
+app.post("/urls/:id", (req, res) => {
+    let shortURL = req.params.id
+    let longURL = req.body.longURL;
+    urlDatabase[shortURL] = longURL;
+    res.redirect("/urls");
+});
+
 // PAGE TO THE LONG URL
 app.get("/u/:shortURL", (req, res) => {
     const longURL = urlDatabase[req.params.shortURL];
@@ -93,11 +100,3 @@ app.listen(PORT, () => {
 });
 
 
-
-// We also need to handle the POST requests on the server.
-
-// Add a POST route that removes a URL resource: POST /urls/:id/delete
-
-// (You will probably need Javascript's delete operator to remove the URL)
-
-// After the resource has been deleted, redirect the client back to the urls_index page ("/urls").
