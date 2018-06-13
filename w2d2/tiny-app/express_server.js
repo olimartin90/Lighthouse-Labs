@@ -2,65 +2,86 @@ var express = require("express");
 var app = express();
 var PORT = 8080; // default port 8080
 
-function generateRandomString() {
-  var text = "";
-  var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
-  for (var i = 0; i < 6; i++)
-    text += possible.charAt(Math.floor(Math.random() * possible.length));
-
-  return text;
-}
-console.log(generateRandomString());
-
 const bodyParser = require("body-parser");
-app.use(bodyParser.urlencoded({extended: true}));
+app.use(bodyParser.urlencoded({
+    extended: true
+}));
 
 app.set("view engine", "ejs");
 
-var urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+// GENERATING A RANDOM STRING FOR A SHORT URL
+function generateRandomString() {
+    var text = "";
+    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    for (var i = 0; i < 6; i++)
+        text += possible.charAt(Math.floor(Math.random() * possible.length));
+    return text;
+}
+
+// URL DATABASE - KEY = SHORT URL : VALUE = LONG URL
+const urlDatabase = {
+    "b2xVn2": "http://www.lighthouselabs.ca",
+    "9sm5xK": "http://www.google.com"
 };
 
+// HOME PAGE - HELLO
 app.get("/", (req, res) => {
-  res.end("Hello!");
+    res.end("Hello!");
 });
 
+// DATABASE WITH JSON
 app.get("/urls.json", (req, res) => {
-  res.json(urlDatabase);
+    res.json(urlDatabase);
 });
 
+// HELLO WORLD PAGE
 app.get("/hello", (req, res) => {
-  res.end("<html><body>Hello <b>World</b></body></html>\n");
+    res.end("<html><body>Hello <b>World</b></body></html>\n");
 });
 
+// DATABASE FORMATTED WITH EJS
 app.get("/urls", (req, res) => {
-  let templateVars = { urls: urlDatabase };
-  res.render("urls_index", templateVars);
+    let templateVars = {
+        urls: urlDatabase
+    };
+    res.render("urls_index", templateVars);
 });
 
-app.post("/urls", (req, res) => {
-  console.log(req.body);  // debug statement to see POST parameters
-  res.send("Ok");         // Respond with 'Ok' (we will replace this)
-});
-
+// URLS NEW ENTRY PAGE FOR USER
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+    res.render("urls_new");
 });
 
+// POST THE NEW GENERATED SHORT URL - LONG URL IN THE DATABASE
+app.post("/urls", (req, res) => {
+    let shortURL = generateRandomString();
+    let longURL = req.body.longURL;
+    urlDatabase[shortURL] = longURL;
+    res.redirect("/urls");
+});
+
+// PAGE SHOWING THE SINGLE URL AND LONG URL
 app.get("/urls/:id", (req, res) => {
-  let shortURL = req.params.id;
-  let longURL = urlDatabase[shortURL];
-  let templateVars = { shortURL: shortURL,
-  longURL: longURL };
-  res.render("urls_show", templateVars);
+    let shortURL = req.params.id;
+    let longURL = urlDatabase[shortURL];
+    let templateVars = {
+        shortURL: shortURL,
+        longURL: longURL
+    };
+    res.render("urls_show", templateVars);
 });
 
+// PAGE TO THE LONG URL
+app.get("/u/:shortURL", (req, res) => {
+    const longURL = urlDatabase[req.params.shortURL];
+    if (longURL === undefined) {
+        res.status(404).send("Not Found");
+    } else {
+        res.redirect(301, longURL);
+    }
+})
+
+// APP LISTENING TO PORT
 app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}!`);
+    console.log(`Example app listening on port ${PORT}!`);
 });
-
-
-Math.random().toString(36).slice(2)
-
