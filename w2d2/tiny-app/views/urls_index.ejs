@@ -19,11 +19,16 @@
     <tr>
       <td><%= shortUrl %></td>
       <td><%= urls[shortUrl] %></td>
+      <td>
+        <form method="POST" action="/urls/<%= shortUrl %>/delete">
+          <input type="submit" value="Delete" />
+        </form>
+      </td>
     </tr>
   <% } %>
   </tbody>
 </table>
-<a href="Url">Shortening a new url</a>
+<a href="/urls/new">Shortening a new url</a>
 </body>
 </html>
 
