@@ -1,6 +1,7 @@
 var express = require("express");
 var app = express();
 var PORT = 8080; // default port 8080
+var cookieParser = require('cookie-parser');
 
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({
@@ -8,6 +9,7 @@ app.use(bodyParser.urlencoded({
 }));
 
 app.set("view engine", "ejs");
+app.use(cookieParser());
 
 // GENERATING A RANDOM STRING FOR A SHORT URL
 function generateRandomString() {
@@ -23,6 +25,26 @@ const urlDatabase = {
     "b2xVn2": "http://www.lighthouselabs.ca",
     "9sm5xK": "http://www.google.com"
 };
+
+// let templateVars = {
+//   username: req.cookies["username"],
+//   // ... any other vars
+// };
+// res.render("urls_index", templateVars);
+
+// // COOKIES
+// app.get('/', function (req, res) {
+//   // Cookies that have not been signed
+//   console.log('Cookies: ', req.cookies)
+//   // Cookies that have been signed
+//   console.log('Signed Cookies: ', req.signedCookies)
+// })
+
+// POST THE USERNAME WITH COOKIES
+app.post("/login", (req, res) => {
+    res.cookie("username", req.body.username)
+    res.redirect("/urls");
+});
 
 // HOME PAGE - HELLO
 app.get("/", (req, res) => {
@@ -42,14 +64,18 @@ app.get("/hello", (req, res) => {
 // DATABASE FORMATTED WITH EJS
 app.get("/urls", (req, res) => {
     let templateVars = {
-        urls: urlDatabase
+        urls: urlDatabase,
+        username: req.cookies["username"]
     };
     res.render("urls_index", templateVars);
 });
 
 // URLS NEW ENTRY PAGE FOR USER
 app.get("/urls/new", (req, res) => {
-    res.render("urls_new");
+    let templateVars = {
+        username: req.cookies["username"]
+    };
+    res.render("urls_new", templateVars);
 });
 
 // POST THE NEW GENERATED SHORT URL - LONG URL IN THE DATABASE
@@ -66,11 +92,13 @@ app.get("/urls/:id", (req, res) => {
     let longURL = urlDatabase[shortURL];
     let templateVars = {
         shortURL: shortURL,
-        longURL: longURL
+        longURL: longURL,
+        username: req.cookies["username"]
     };
     res.render("urls_show", templateVars);
 });
 
+// POST THE URL UPDDATED AFTER EDITING
 app.post("/urls/:id", (req, res) => {
     let shortURL = req.params.id
     let longURL = req.body.longURL;
@@ -86,8 +114,9 @@ app.get("/u/:shortURL", (req, res) => {
     } else {
         res.redirect(301, longURL);
     }
-})
+});
 
+// DELETE URL
 app.post("/urls/:id/delete", (req, res) => {
     let shortURL = req.params.id;
     delete urlDatabase[shortURL];
