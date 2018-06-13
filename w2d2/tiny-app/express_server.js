@@ -18,7 +18,7 @@ function generateRandomString() {
     for (var i = 0; i < 6; i++)
         text += possible.charAt(Math.floor(Math.random() * possible.length));
     return text;
-}
+};
 
 // URL DATABASE - KEY = SHORT URL : VALUE = LONG URL
 const urlDatabase = {
@@ -26,23 +26,15 @@ const urlDatabase = {
     "9sm5xK": "http://www.google.com"
 };
 
-// let templateVars = {
-//   username: req.cookies["username"],
-//   // ... any other vars
-// };
-// res.render("urls_index", templateVars);
-
-// // COOKIES
-// app.get('/', function (req, res) {
-//   // Cookies that have not been signed
-//   console.log('Cookies: ', req.cookies)
-//   // Cookies that have been signed
-//   console.log('Signed Cookies: ', req.signedCookies)
-// })
-
-// POST THE USERNAME WITH COOKIES
+// POST THE USERNAME WITH COOKIES for LOGGING IN
 app.post("/login", (req, res) => {
     res.cookie("username", req.body.username)
+    res.redirect("/urls");
+});
+
+// CLEAR THE COOKIES WHEN LOGGING OUT
+app.post("/logout", (req, res) => {
+    res.clearCookie("username")
     res.redirect("/urls");
 });
 
